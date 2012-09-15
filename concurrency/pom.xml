@@ -38,7 +38,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ee.ut.jf.App</mainClass>
+                            <mainClass>ee.ut.jf.concurrency.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
