@@ -1,22 +1,38 @@
 package ee.ut.jf.forkjoin;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class App {
+  private static AtomicBoolean visited = new AtomicBoolean(false);
 
   public static void main(String[] args) throws Exception {
     File file = getFile(args);
 
     BufferedImage image = ImageIO.read(file);
 
-    new ImageFrame("Original", image);
+    WindowAdapter adapter = new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+        JFrame frame = (JFrame) e.getSource();
+        if (visited.compareAndSet(false, true))
+          frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        else
+          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      }
+    };
+
+    new ImageFrame("Original", image).addWindowListener(adapter);
 
     BufferedImage mirroredImage = mirror(image);
 
-    new ImageFrame("Mirrored", mirroredImage);
+    new ImageFrame("Mirrored", mirroredImage).addWindowListener(adapter);
   }
 
   public static File getFile(String[] args) {
