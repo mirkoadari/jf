@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class App {
   private static AtomicBoolean visited = new AtomicBoolean(false);
@@ -56,16 +57,19 @@ public class App {
     int w = srcImage.getWidth();
     int h = srcImage.getHeight();
 
-    int[] src = srcImage.getRGB(0, 0, w, h, null, 0, w);
+    // Each worker modifies a separate area, but we still need visibility for results
+    AtomicIntegerArray src = new AtomicIntegerArray(
+      srcImage.getRGB(0, 0, w, h, null, 0, w)
+    );
 
-    System.out.println("Array size is " + src.length);
+    System.out.println("Array size is " + src.length());
 
     int processors = Runtime.getRuntime().availableProcessors();
     System.out.println(Integer.toString(processors) + " processor" +
       (processors != 1 ? "s are " : " is ") +
       "available");
 
-    ForkMirror fm = new ForkMirror(src, 0, src.length - 1, w);
+    ForkMirror fm = new ForkMirror(src, 0, src.length() - 1, w);
 
     ForkJoinPool pool = new ForkJoinPool();
 
@@ -75,9 +79,13 @@ public class App {
 
     System.out.println("Image mirror took " + (endTime - startTime) + " milliseconds.");
 
+    int[] dst = new int[src.length()];
+    for (int i = 0; i < src.length(); i++)
+      dst[i] = src.get(i);
+
     BufferedImage dstImage =
       new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-    dstImage.setRGB(0, 0, w, h, src, 0, w);
+    dstImage.setRGB(0, 0, w, h, dst, 0, w);
 
     return dstImage;
   }

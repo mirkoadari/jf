@@ -1,14 +1,15 @@
 package ee.ut.jf.forkjoin;
 
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class ForkMirror extends RecursiveAction {
-  private int[] mSource;
+  private AtomicIntegerArray mSource;
   private int mStart;
   private int mWidth;
   private int mEnd;
 
-  public ForkMirror(int[] src, int start, int end, int width) {
+  public ForkMirror(AtomicIntegerArray src, int start, int end, int width) {
     mSource = src;
     mStart = start;
     mWidth = width;
@@ -23,10 +24,10 @@ public class ForkMirror extends RecursiveAction {
         int c = mWidth - index % mWidth - 1;
         int mIndex = index / mWidth * mWidth + c;
 
-        int pixel = mSource[index];
-        int mirror = mSource[mIndex];
+        int pixel = mSource.get(index);
+        int mirror = mSource.get(mIndex);
 
-        mSource[index] = average(pixel, mirror);
+        mSource.set(index, average(pixel, mirror));
       }
     }
   }
