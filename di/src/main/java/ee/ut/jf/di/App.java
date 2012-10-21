@@ -14,7 +14,7 @@ public class App {
       ComponentRepository cr = new ComponentRepository(beans);
       cr.autowire();
 
-      Bean c = (Bean) cr.getComponent("A");
+      Bean c = cr.getComponent("A");
       c.toString();
   }
 
