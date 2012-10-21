@@ -20,22 +20,25 @@ public class ComponentRepository {
     }
 
     public void autowire() throws Exception {
+        Map<String, BeanImpl> instances = new HashMap<String, BeanImpl>();
+
         for (XmlBean xml : store.beans) {
             Class<?> clazz = Class.forName(xml.className);
             Object instance = clazz.newInstance();
+            instances.put(xml.id, (BeanImpl) instance);
 
             String delegateId = xml.dependency == null ? null : xml.dependency.id;
 
-            DelegateProxy proxy = new DelegateProxy(this, instance, xml.method, xml.trace, delegateId);
+            DelegateProxy proxy = new DelegateProxy(instance, xml.method, xml.trace);
 
             Bean bean = (Bean) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Bean.class}, proxy);
 
-            if (xml.dependency != null) {
-                ((BeanImpl) instance).setDelegate(bean);
-            }
-
             components.put(xml.id, bean);
         }
+
+        for (XmlBean xml : store.beans)
+            if (xml.dependency != null)
+                instances.get(xml.id).setDelegate(components.get(xml.dependency.id));
     }
 
 }
