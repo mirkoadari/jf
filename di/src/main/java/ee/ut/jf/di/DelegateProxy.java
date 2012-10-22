@@ -23,7 +23,7 @@ public class DelegateProxy implements InvocationHandler {
         Bean delegate = (Bean) delegateField.get(instance);
 
         if (delegate != null)
-            delegate.toString();
+            delegate.getClass().getDeclaredMethod(method.getName()).invoke(delegate, args);
 
         if (trace)
             System.out.println("Calling " + instance.getClass().getSimpleName() + "." + methodName);
